@@ -48,12 +48,7 @@ def DFT_analyse(record):
     return coefVector
 
 def onclick(event):
-    global ix, iy
-    ix, iy = event.xdata, event.ydata
-    print(ix)
-    print("\t")
-    print(iy)
-    print("\n")
+    realVector[event.xdata] = event.ydata
 
 #################################
 
@@ -71,15 +66,16 @@ sd.stop()
 
 fig, ax = plt.subplots()
 ax.plot(record)
-fig.canvas.mpl_connect('button_press_event', onclick)
 plt.show()
 
 coefVector = DFT_analyse(record)
 
-realVector = np.real(coefVector)
+realVector = np.real(np.absolute(coefVector))
 
 fig, ax = plt.subplots()
-ax.plot(np.absolute(realVector))
+ax.plot(realVector)
+
+fig.canvas.mpl_connect('button_press_event', onclick)
 plt.show()
 
 imagVector = np.imag(coefVector)
