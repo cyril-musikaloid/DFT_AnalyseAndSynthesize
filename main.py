@@ -2,12 +2,13 @@ import numpy as np
 import sounddevice as sd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # samples per second
-smpl_rate = 8000
+smpl_rate = 2000
 
 # Record in seconds
-duration = 0.05 
+duration = 0.025 
  
  # Define default sounddevice setting
 sd.default.samplerate = smpl_rate
@@ -48,33 +49,43 @@ def DFT_analyse(record):
     return coefVector
 
 #################################
-
-playStartBeep()
-
- # Record the sound
 record = sd.rec(int(duration * smpl_rate), dtype='int')
 sd.wait()
- 
-playEndBeep()
-
-sd.play(record, smpl_rate)
-sd.wait()
-sd.stop()
-
-fig, ax = plt.subplots()
-ax.plot(record)
-plt.show()
-
 coefVector = DFT_analyse(record)
 
-realVector = np.real(coefVector)
+realVector = np.absolute(np.real(coefVector))
 
 fig, ax = plt.subplots()
-ax.plot(np.absolute(realVector))
+plot1, = ax.plot(realVector)
+
+def recordSound():
+    record = sd.rec(int(duration * smpl_rate), dtype='int')
+    sd.wait()
+    coefVector = DFT_analyse(record)
+
+    realVector = np.absolute(np.real(coefVector))
+    plot1.set_ydata(realVector)
+    return plot1
+
+ani = FuncAnimation(fig,
+                    recordSound,
+                    interval=1)
+
 plt.show()
 
-imagVector = np.imag(coefVector)
 
-fig, ax = plt.subplots()
-ax.plot(np.absolute(imagVector))
-plt.show()
+
+def garbage():
+    coefVector = DFT_analyse(record)
+
+    realVector = np.real(coefVector)
+
+    fig, ax = plt.subplots()
+    ax.plot(np.absolute(realVector))
+    plt.show()
+
+    imagVector = np.imag(coefVector)
+
+    fig, ax = plt.subplots()
+    ax.plot(np.absolute(imagVector))
+    plt.show()
