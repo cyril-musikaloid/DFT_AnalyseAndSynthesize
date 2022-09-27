@@ -47,6 +47,14 @@ def DFT_analyse(record):
 
     return coefVector
 
+def onclick(event):
+    global ix, iy
+    ix, iy = event.xdata, event.ydata
+    print(ix)
+    print("\t")
+    print(iy)
+    print("\n")
+
 #################################
 
 playStartBeep()
@@ -63,6 +71,7 @@ sd.stop()
 
 fig, ax = plt.subplots()
 ax.plot(record)
+fig.canvas.mpl_connect('button_press_event', onclick)
 plt.show()
 
 coefVector = DFT_analyse(record)
