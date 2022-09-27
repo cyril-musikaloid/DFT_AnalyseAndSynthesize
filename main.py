@@ -4,10 +4,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # samples per second
-smpl_rate = 44100
+smpl_rate = 8000
 
 # Record in seconds
-duration = 3 
+duration = 0.05 
  
  # Define default sounddevice setting
 sd.default.samplerate = smpl_rate
@@ -29,6 +29,24 @@ def playEndBeep():
     sd.wait()
     sd.stop()
 
+def DFT_computeCoef(record, k):
+    N = record.size
+    coef = 0
+
+    for n in range(N):
+        coef += record[n] * np.exp(-1j*((2*np.pi)/N)*n*k)
+    
+    return coef
+
+def DFT_analyse(record):
+    N = record.size
+    coefVector = np.linspace(0, (int)(N/2), (int)(N/2), True, dtype=complex)
+    
+    for k in range((int)(N/2)):
+        coefVector[k] = DFT_computeCoef(record, k)
+
+    return coefVector
+
 #################################
 
 playStartBeep()
@@ -43,7 +61,20 @@ sd.play(record, smpl_rate)
 sd.wait()
 sd.stop()
 
-
 fig, ax = plt.subplots()
 ax.plot(record)
+plt.show()
+
+coefVector = DFT_analyse(record)
+
+realVector = np.real(coefVector)
+
+fig, ax = plt.subplots()
+ax.plot(np.absolute(realVector))
+plt.show()
+
+imagVector = np.imag(coefVector)
+
+fig, ax = plt.subplots()
+ax.plot(np.absolute(imagVector))
 plt.show()
