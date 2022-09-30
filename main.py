@@ -58,7 +58,7 @@ realVector = np.absolute(np.real(coefVector))
 fig, ax = plt.subplots()
 plot1, = ax.plot(realVector)
 
-def recordSound():
+def recordSound(i):
     record = sd.rec(int(duration * smpl_rate), dtype='int')
     sd.wait()
     coefVector = DFT_analyse(record)
