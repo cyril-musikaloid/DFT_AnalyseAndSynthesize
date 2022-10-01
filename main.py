@@ -70,10 +70,27 @@ def onclick(event):
 
 def onkey(event):
     buffer = DFT_synthesize(realVector + imagVector * 1j)
-    displayPlot(np.round(np.real(buffer)))
-    displayPlot(np.imag(buffer))
-    displayPlot(record)
-    sd.play(np.int32((np.round(np.real(buffer)))), loop=True, blocking=False)
+    realBuffer = np.int32(np.round(np.real(buffer)))
+    imagBuffer = np.imag(buffer)
+    displayAllPlot(realBuffer, imagBuffer, record)
+    sd.play(np.int32(np.round(np.real(buffer))), loop=True, blocking=False)
+
+def displayAllPlot(realBuffer, imagBuffer, record):
+    aFig, axd = plt.subplot_mosaic([['freq'],
+                                    ['.'],
+                                    ['phase'],
+                                    ['.'],
+                                    ['record']])
+
+    axd['freq'].set_title('frequencies')
+    axd['phase'].set_title('phase')
+    axd['record'].set_title('record')
+
+    axd['freq'].plot(realBuffer)
+    axd['phase'].plot(imagBuffer)
+    axd['record'].plot(record)
+
+    plt.show()
 
 def displayPlot(buffer):
     dfig, dax = plt.subplots()
@@ -86,13 +103,14 @@ def updatePlot(i):
 def findPatternPosition(ascending, buffer, value):
 
     for i in range(20, buffer.size):
-        indexAscending = buffer[i] < buffer[i+1]
+        indexAscending = buffer[i] < buffer[i-1]
 
         if buffer[i] > value > buffer[i-1] & ascending & indexAscending:
             return i-1
         elif buffer[i] < value < buffer[i-1] & (not ascending) & (not indexAscending):
             return i-1
 
+    return 20
 
 
 def reworkRecord(buffer):
@@ -123,7 +141,7 @@ displayPlot(record)
 
 coefVector = DFT_analyse(record)
 
-realVector = np.real(np.absolute(coefVector))
+realVector = np.real(coefVector)
 imagVector = np.imag(coefVector)
 
 fig, ax = plt.subplots()
