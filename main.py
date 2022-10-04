@@ -1,3 +1,4 @@
+from array import array
 from signal import signal
 import numpy as np
 import sounddevice as sd
@@ -39,10 +40,13 @@ def DFT_computeCoef(record, k):
     
     return coef
 
-def DFT_analyse(record):
+def DFT_analyse(record, L = 0):
     N = record.size
-    coefVector = np.linspace(0, (N-1), N, False, dtype=complex)
+    if L:
+        N = L
     
+    coefVector = np.linspace(0, (N-1), N, False, dtype=complex)
+
     for k in range((N)):
         coefVector[k] = DFT_computeCoef(record, k)
 
@@ -135,7 +139,7 @@ def DFT_analyseAndDisplay(signal):
     DFTed_Signal = DFT_analyse(signal)
     displayAllPlot(np.real(DFTed_Signal), np.imag(DFTed_Signal), np.real(signal), np.imag(signal))
 
-def record(duration = _duration, sampleRate = _smpl_rate):
+def Record(duration = _duration, sampleRate = _smpl_rate):
     playStartBeep()
 
     record=sd.rec(int(duration * sampleRate))
@@ -144,12 +148,39 @@ def record(duration = _duration, sampleRate = _smpl_rate):
     playEndBeep()
     return record
 
+def Play(record):
+    sd.play(record)
+    sd.wait()
+
+def ComputeSpectrogram(signal, windowSize = 256):
+    N = signal.size
+    L = windowSize
+
+    numberOfSlice = np.int32(np.ceil(N/L))
+
+    spectrogram = np.empty((numberOfSlice, np.int32(L/2)))
+
+    for sliceIndex in range(numberOfSlice):
+        spectrogram[sliceIndex] = np.abs(np.real(DFT_analyse(signal[sliceIndex*L:(sliceIndex+1)*L],  np.int32(L/2))))
+
+    return spectrogram
+
+def DisplaySpectrogram(spectrogram):
+    dfig, dax = plt.subplots()
+    im = dax.imshow(spectrogram, cmap='plasma', origin='upper')
+    
+    plt.show()
+
 #################################
 
 ##### Computation Function ######
 
 #################################
 
-record = record(duration=2)
+record = Record(duration=2)
 
-DFT_analyseAndDisplay(record)
+Play(record)
+
+spectrogram = ComputeSpectrogram(record, windowSize=128)
+
+DisplaySpectrogram(spectrogram)
